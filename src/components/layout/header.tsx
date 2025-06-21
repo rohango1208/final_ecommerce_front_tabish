@@ -2,11 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Heart, Menu, Search, ShoppingBag } from 'lucide-react';
+import { Heart, Menu, Search, ShoppingBag, User } from 'lucide-react';
 
 import { Logo } from '@/components/shared/logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { cn } from '@/lib/utils';
 
 export function Header() {
@@ -23,8 +31,8 @@ export function Header() {
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Earrings', href: '/earrings' },
-    { name: 'About', href: '#' },
-    { name: 'Contact', href: '#' },
+    { name: 'About', href: '/about' },
+    { name: 'Contact', href: '/contact' },
   ];
 
   return (
@@ -53,17 +61,41 @@ export function Header() {
           </nav>
 
           <div className="flex items-center space-x-2 md:space-x-4">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Search className="h-6 w-6" />
-              <span className="sr-only">Search</span>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Search className="h-6 w-6" />
+                  <span className="sr-only">Search</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Search</DialogTitle>
+                </DialogHeader>
+                <div className="flex items-center space-x-2">
+                  <Input placeholder="Search for products..." />
+                  <Button type="submit">Search</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Button asChild variant="ghost" size="icon" className="rounded-full">
+              <Link href="/login">
+                <User className="h-6 w-6" />
+                <span className="sr-only">Login</span>
+              </Link>
             </Button>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Heart className="h-6 w-6" />
-              <span className="sr-only">Wishlist</span>
+            <Button asChild variant="ghost" size="icon" className="rounded-full">
+              <Link href="/wishlist">
+                <Heart className="h-6 w-6" />
+                <span className="sr-only">Wishlist</span>
+              </Link>
             </Button>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <ShoppingBag className="h-6 w-6" />
-              <span className="sr-only">Cart</span>
+            <Button asChild variant="ghost" size="icon" className="rounded-full">
+               <Link href="/cart">
+                <ShoppingBag className="h-6 w-6" />
+                <span className="sr-only">Cart</span>
+              </Link>
             </Button>
 
             <div className="md:hidden">
