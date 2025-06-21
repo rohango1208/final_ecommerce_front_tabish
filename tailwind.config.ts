@@ -8,11 +8,23 @@ export default {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
-        code: ['monospace'],
+        body: ['Poppins', 'sans-serif'],
+        headline: ['"Playfair Display"', 'serif'],
+      },
+      letterSpacing: {
+        'headline': '0.5px',
+      },
+      lineHeight: {
+        'extra-loose': '1.2',
       },
       colors: {
         background: 'hsl(var(--background))',
