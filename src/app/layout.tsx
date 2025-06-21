@@ -5,7 +5,7 @@ import { Footer } from '@/components/layout/footer';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Ethereal Earrings',
+  title: 'RAANI',
   description: 'Your Destination for Handcrafted Elegance',
 };
 

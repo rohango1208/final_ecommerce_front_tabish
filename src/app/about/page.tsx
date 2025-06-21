@@ -6,7 +6,7 @@ export default function AboutPage() {
     <div className="bg-background">
       <div className="container mx-auto px-4 py-16 md:py-24">
         <div className="text-center mb-16 animate-in fade-in slide-in-from-top-4 duration-700">
-          <h1 className="text-4xl md:text-5xl font-bold">About Ethereal Earrings</h1>
+          <h1 className="text-4xl md:text-5xl font-bold">About RAANI</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
             Discover the story behind our handcrafted jewelry, where passion for artistry and commitment to quality shine in every piece.
           </p>
@@ -16,7 +16,7 @@ export default function AboutPage() {
           <div className="animate-in fade-in slide-in-from-left-8 duration-700">
             <h2 className="text-3xl font-bold mb-4">Our Journey</h2>
             <p className="text-muted-foreground mb-4">
-              Ethereal Earrings was born from a simple idea: to create beautiful, high-quality earrings that are both timeless and accessible. What started as a small passion project in a home studio has blossomed into a brand beloved by customers worldwide.
+              RAANI was born from a simple idea: to create beautiful, high-quality earrings that are both timeless and accessible. What started as a small passion project in a home studio has blossomed into a brand beloved by customers worldwide.
             </p>
             <p className="text-muted-foreground">
               We believe that jewelry is more than just an accessory; it's a form of self-expression. Our designs are inspired by nature, art, and the stories of the strong, elegant individuals who wear them.
