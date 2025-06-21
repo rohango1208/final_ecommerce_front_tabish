@@ -24,12 +24,11 @@ export default function AboutPage() {
           </div>
           <div className="animate-in fade-in slide-in-from-right-8 duration-700">
             <Image
-              src="https://placehold.co/600x400"
+              src="https://images.unsplash.com/photo-1596525793393-a2d5e2380387?q=80&w=600&h=400&auto=format&fit=crop"
               alt="Artisan crafting jewelry"
               width={600}
               height={400}
               className="rounded-lg shadow-lg"
-              data-ai-hint="artisan jewelry"
             />
           </div>
         </div>

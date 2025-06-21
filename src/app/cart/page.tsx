@@ -29,7 +29,7 @@ export default function CartPage() {
             <div className="lg:col-span-2 space-y-6">
               {cartItems.map(item => (
                 <div key={item.id} className="flex items-center gap-4 bg-card p-4 rounded-lg shadow-sm">
-                  <Image src={item.images[0]} alt={item.name} width={100} height={100} className="rounded-md" data-ai-hint="earring jewelry" />
+                  <Image src={item.images[0]} alt={item.name} width={100} height={100} className="rounded-md" />
                   <div className="flex-grow">
                     <h3 className="font-semibold">{item.name}</h3>
                     <p className="text-sm text-muted-foreground">${item.price.toFixed(2)}</p>

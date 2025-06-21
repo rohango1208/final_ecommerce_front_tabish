@@ -21,12 +21,11 @@ export default function Home() {
       <section className="relative w-full h-[85vh] min-h-[600px] flex items-center justify-center text-center text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
-            src="https://placehold.co/1920x1080"
+            src="https://images.unsplash.com/photo-1611652022417-a52137e757c5?q=80&w=1920&h=1080&auto=format&fit=crop"
             alt="Elegant earrings on a minimalist background"
             fill
             className="object-cover"
             priority
-            data-ai-hint="elegant jewelry model"
           />
           <div className="absolute inset-0 bg-black/40" />
         </div>

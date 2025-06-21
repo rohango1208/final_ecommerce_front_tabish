@@ -48,7 +48,6 @@ export function ProductCard({ product }: ProductCardProps) {
                 "object-cover transition-all duration-500 ease-in-out group-hover:scale-105",
                 isHovered && product.images.length > 1 ? "opacity-0" : "opacity-100"
               )}
-              data-ai-hint="earring jewelry"
             />
             {product.images.length > 1 && (
               <Image
@@ -59,7 +58,6 @@ export function ProductCard({ product }: ProductCardProps) {
                   "object-cover transition-all duration-500 ease-in-out group-hover:scale-105",
                   isHovered ? "opacity-100" : "opacity-0"
                 )}
-                data-ai-hint="earring model"
               />
             )}
             <Button
