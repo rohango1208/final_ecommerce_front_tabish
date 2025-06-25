@@ -20,58 +20,62 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const formSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  password: z.string().min(1, {
-    message: "Password is required.",
+  password: z.string().min(8, {
+    message: "Password must be at least 8 characters.",
   }),
 });
 
-export default function LoginPage() {
+export default function SignupPage() {
   const { toast } = useToast();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Mock authentication
-    if (values.email === "admin@raani.com" && values.password === "admin") {
-      toast({
-        title: "Admin Login Successful!",
-        description: "Redirecting to the admin dashboard...",
-      });
-      router.push('/admin');
-    } else {
-      console.log(values);
-      toast({
-        title: "Logged In!",
-        description: "Welcome back!",
-      });
-      // Here you would typically handle the login logic
-      // For now, we can just reset the form or redirect to home
-      // router.push('/');
-    }
+    console.log(values);
+    toast({
+      title: "Account Created!",
+      description: "You have successfully signed up. Please log in.",
+    });
+    router.push('/login');
   }
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-20rem)] bg-secondary/20 py-12">
         <Card className="w-full max-w-sm">
             <CardHeader>
-                <CardTitle className="text-2xl">Login</CardTitle>
+                <CardTitle className="text-2xl">Create an account</CardTitle>
                 <CardDescription>
-                    Enter your email below to login to your account.
+                    Enter your details below to create your account.
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Name</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Your Name" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="email"
@@ -98,13 +102,13 @@ export default function LoginPage() {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" className="w-full">Login</Button>
+                        <Button type="submit" className="w-full">Create Account</Button>
                     </form>
                 </Form>
                  <div className="mt-4 text-center text-sm">
-                    Don't have an account?{" "}
-                    <Link href="/signup" className="underline">
-                        Sign up
+                    Already have an account?{" "}
+                    <Link href="/login" className="underline">
+                        Login
                     </Link>
                 </div>
             </CardContent>

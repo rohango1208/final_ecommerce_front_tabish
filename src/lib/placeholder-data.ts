@@ -1,4 +1,4 @@
-import type { Product } from './types';
+import type { Product, Order } from './types';
 
 export const products: Product[] = [
   {
@@ -88,5 +88,70 @@ export const products: Product[] = [
     material: 'beads',
     color: 'blue',
     isNew: true,
+  },
+];
+
+export const orders: Order[] = [
+  {
+    id: 'ORD-001',
+    customerName: 'Olivia Martin',
+    customerEmail: 'olivia.martin@email.com',
+    orderDate: '2023-11-23',
+    total: 89.99,
+    paymentStatus: 'Paid',
+    fulfillmentStatus: 'Fulfilled',
+    items: [
+      { productId: '3', quantity: 1, name: 'Emerald Drop Dangles', price: 89.99 },
+    ],
+  },
+  {
+    id: 'ORD-002',
+    customerName: 'Jackson Lee',
+    customerEmail: 'jackson.lee@email.com',
+    orderDate: '2023-11-20',
+    total: 110.00,
+    paymentStatus: 'Paid',
+    fulfillmentStatus: 'Fulfilled',
+    items: [
+      { productId: '1', quantity: 1, name: 'Golden Bloom Studs', price: 45.00 },
+      { productId: '2', quantity: 1, name: 'Silver Celestial Hoops', price: 65.00 },
+    ],
+  },
+  {
+    id: 'ORD-003',
+    customerName: 'Isabella Nguyen',
+    customerEmail: 'isabella.nguyen@email.com',
+    orderDate: '2023-11-15',
+    total: 35.00,
+    paymentStatus: 'Paid',
+    fulfillmentStatus: 'Processing',
+    items: [
+      { productId: '5', quantity: 1, name: 'Minimalist Gold Bar Studs', price: 35.00 },
+    ],
+  },
+  {
+    id: 'ORD-004',
+    customerName: 'Sophia Williams',
+    customerEmail: 'sophia.williams@email.com',
+    orderDate: '2023-11-10',
+    total: 130.00,
+    paymentStatus: 'Pending',
+    fulfillmentStatus: 'Unfulfilled',
+    items: [
+      { productId: '6', quantity: 1, name: 'Oceanic Wave Hoops', price: 75.00 },
+      { productId: '8', quantity: 1, name: 'Midnight Blue Beaded Hoops', price: 55.00 },
+    ],
+  },
+    {
+    id: 'ORD-005',
+    customerName: 'Ava Johnson',
+    customerEmail: 'ava.johnson@email.com',
+    orderDate: '2023-11-05',
+    total: 95.00,
+    paymentStatus: 'Paid',
+    fulfillmentStatus: 'Fulfilled',
+    items: [
+      { productId: '7', quantity: 1, name: 'Rose Quartz Teardrops', price: 95.00 },
+    ],
   },
 ];

@@ -14,6 +14,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input";
 import { cn } from '@/lib/utils';
 
@@ -79,12 +87,24 @@ export function Header() {
               </DialogContent>
             </Dialog>
 
-            <Button asChild variant="ghost" size="icon" className="rounded-full">
-              <Link href="/login">
-                <User className="h-6 w-6" />
-                <span className="sr-only">Login</span>
-              </Link>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User className="h-6 w-6" />
+                  <span className="sr-only">User Menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild><Link href="/login">Profile</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/login">Login</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/signup">Sign Up</Link></DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild><Link href="/login">Admin Login</Link></DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button asChild variant="ghost" size="icon" className="rounded-full">
               <Link href="/wishlist">
                 <Heart className="h-6 w-6" />
