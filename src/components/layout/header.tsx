@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Heart, Menu, Search, ShoppingBag, User } from 'lucide-react';
 
 import { Logo } from '@/components/shared/logo';
@@ -27,6 +28,7 @@ import { cn } from '@/lib/utils';
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,6 +37,10 @@ export function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+  
+  if (pathname.startsWith('/admin')) {
+    return null;
+  }
 
   const navLinks = [
     { name: 'Home', href: '/' },

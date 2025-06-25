@@ -41,22 +41,21 @@ export default function LoginPage() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Mock authentication
+    // Mock authentication based on role
     if (values.email === "admin@raani.com" && values.password === "admin") {
+      // Super Admin Role
       toast({
         title: "Admin Login Successful!",
         description: "Redirecting to the admin dashboard...",
       });
       router.push('/admin');
     } else {
-      console.log(values);
+      // Regular User Role
       toast({
         title: "Logged In!",
-        description: "Welcome back!",
+        description: "Welcome back! Redirecting...",
       });
-      // Here you would typically handle the login logic
-      // For now, we can just reset the form or redirect to home
-      // router.push('/');
+      router.push('/');
     }
   }
 

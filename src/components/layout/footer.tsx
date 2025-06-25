@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Facebook, Instagram, Twitter } from 'lucide-react';
 import { Logo } from '@/components/shared/logo';
 import { Input } from '@/components/ui/input';
@@ -9,12 +10,15 @@ import { Button } from '@/components/ui/button';
 
 export function Footer() {
   const [year, setYear] = useState(new Date().getFullYear());
+  const pathname = usePathname();
 
   useEffect(() => {
-    // This effect will run on the client, ensuring the year is up-to-date
-    // without causing a server-client mismatch.
     setYear(new Date().getFullYear());
   }, []);
+
+  if (pathname.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <footer className="bg-secondary/30">
