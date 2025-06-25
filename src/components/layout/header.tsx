@@ -106,8 +106,6 @@ export function Header() {
                 <DropdownMenuItem asChild><Link href="/login">Profile</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link href="/login">Login</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link href="/signup">Sign Up</Link></DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild><Link href="/login">Admin Login</Link></DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
