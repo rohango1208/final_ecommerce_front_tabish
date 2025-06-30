@@ -41,12 +41,16 @@ export default function LoginPage() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+ async function onSubmit(values: z.infer<typeof formSchema>) {
   try {
     const res = await login({
       Email: values.email,
       Password: values.password,
     });
+
+    // ✅ Save token & user to localStorage
+    localStorage.setItem("token", res.token);
+    localStorage.setItem("user", JSON.stringify(res.user));
 
     toast({
       title: res.message || "Login successful",
@@ -54,10 +58,10 @@ export default function LoginPage() {
     });
 
     if (res.user?.Email === "admin@raani.com") {
-      router.push("/admin"); // Redirect admin
-    } else {
-      router.push("/"); // Redirect normal user
-    }
+  window.location.href = "/admin"; 
+} else {
+  window.location.href = "/"; 
+}
   } catch (error: any) {
     toast({
       title: "❌ Login failed",
@@ -67,6 +71,7 @@ export default function LoginPage() {
     console.error("Login error:", error);
   }
 }
+
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-20rem)] bg-secondary/20 py-12">

@@ -28,17 +28,32 @@ import { cn } from '@/lib/utils';
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  
-  if (pathname.startsWith('/admin')) {
+
+  // 👇 Get user from localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    window.location.href = "/login"; // or router.push('/login') if using Next Router
+  };
+
+  if (pathname.startsWith("/admin")) {
     return null;
   }
 
@@ -94,20 +109,37 @@ export function Header() {
             </Dialog>
 
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <User className="h-6 w-6" />
-                  <span className="sr-only">User Menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild><Link href="/login">Profile</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/login">Login</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/signup">Sign Up</Link></DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <User className="h-6 w-6" />
+          <span className="sr-only">User Menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+
+        {user ? (
+          <>
+            <DropdownMenuItem asChild>
+              <Link href="/profile">Profile</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
+              Logout
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <>
+            <DropdownMenuItem asChild>
+              <Link href="/login">Login</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/signup">Sign Up</Link>
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
 
             <Button asChild variant="ghost" size="icon" className="rounded-full">
               <Link href="/wishlist">

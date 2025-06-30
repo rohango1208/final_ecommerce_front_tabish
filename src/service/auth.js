@@ -13,3 +13,14 @@ export const login = async (credentials) => {
   return res.data;
 };
 
+export const getMe = async () => {
+  const token = localStorage.getItem("token");
+
+  const res = await api.get("/users/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+};
