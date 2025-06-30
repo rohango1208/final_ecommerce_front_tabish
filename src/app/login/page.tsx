@@ -6,6 +6,7 @@ import * as z from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { login } from "@/service/auth";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -40,24 +41,32 @@ export default function LoginPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Mock authentication based on role
-    if (values.email === "admin@raani.com" && values.password === "admin") {
-      // Super Admin Role
-      toast({
-        title: "Admin Login Successful!",
-        description: "Redirecting to the admin dashboard...",
-      });
-      router.push('/admin');
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+  try {
+    const res = await login({
+      Email: values.email,
+      Password: values.password,
+    });
+
+    toast({
+      title: res.message || "Login successful",
+      description: `Welcome ${res.user?.Name || ""}`,
+    });
+
+    if (res.user?.Email === "admin@raani.com") {
+      router.push("/admin"); // Redirect admin
     } else {
-      // Regular User Role
-      toast({
-        title: "Logged In!",
-        description: "Welcome back! Redirecting...",
-      });
-      router.push('/');
+      router.push("/"); // Redirect normal user
     }
+  } catch (error: any) {
+    toast({
+      title: "❌ Login failed",
+      description: error?.response?.data?.message || "Something went wrong.",
+      variant: "destructive",
+    });
+    console.error("Login error:", error);
   }
+}
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-20rem)] bg-secondary/20 py-12">

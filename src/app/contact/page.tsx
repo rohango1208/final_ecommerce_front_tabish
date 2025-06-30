@@ -42,28 +42,30 @@ export default function ContactPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
     console.log(values);
     toast({
       title: "Message Sent!",
       description: "Thank you for contacting us. We'll get back to you soon.",
     });
     form.reset();
-  }
+  };
 
   return (
     <div className="bg-secondary/20">
       <div className="container mx-auto px-4 py-16 md:py-24">
+        {/* Page Heading */}
         <div className="text-center mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
-          <h1 className="text-4xl md:text-5xl font-bold">
-            Get In Touch
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold">Get In Touch</h1>
           <p className="mt-3 text-lg text-muted-foreground max-w-2xl mx-auto">
-            We'd love to hear from you. Whether you have a question about our products, need assistance, or just want to say hello, feel free to reach out.
+            We'd love to hear from you. Whether you have a question about our products,
+            need assistance, or just want to say hello, feel free to reach out.
           </p>
         </div>
 
+        {/* Contact Form & Info */}
         <div className="grid md:grid-cols-2 gap-16 items-start">
+          {/* Contact Form */}
           <div className="bg-card p-8 rounded-lg shadow-md animate-in fade-in slide-in-from-left-8 duration-700">
             <h2 className="text-2xl font-bold mb-6">Contact Form</h2>
             <Form {...form}>
@@ -117,33 +119,37 @@ export default function ContactPage() {
             </Form>
           </div>
 
+          {/* Contact Info */}
           <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-700">
             <h2 className="text-2xl font-bold mb-6">Our Information</h2>
+
             <div className="flex items-start gap-4">
               <div className="bg-primary text-primary-foreground rounded-full p-3">
                 <MapPin className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg">Our Studio</h3>
-                <p className="text-muted-foreground">123 Sparkle Lane, Jewel City, 12345</p>
+                <h3 className="font-semibold text-lg">Office Address</h3>
+                <p className="text-muted-foreground">123 Sparkle Lane, Jewel City</p>
               </div>
             </div>
-             <div className="flex items-start gap-4">
+
+            <div className="flex items-start gap-4">
               <div className="bg-primary text-primary-foreground rounded-full p-3">
                 <Mail className="h-6 w-6" />
               </div>
               <div>
                 <h3 className="font-semibold text-lg">Email Us</h3>
-                <p className="text-muted-foreground">hello@raani.com</p>
+                <p className="text-muted-foreground">raani@gmail.com</p>
               </div>
             </div>
-             <div className="flex items-start gap-4">
+
+            <div className="flex items-start gap-4">
               <div className="bg-primary text-primary-foreground rounded-full p-3">
                 <Phone className="h-6 w-6" />
               </div>
               <div>
                 <h3 className="font-semibold text-lg">Call Us</h3>
-                <p className="text-muted-foreground">(555) 123-4567</p>
+                <p className="text-muted-foreground">+1 (778) 861-0071</p>
               </div>
             </div>
           </div>

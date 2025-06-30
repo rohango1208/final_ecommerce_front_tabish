@@ -1,5 +1,10 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { fetchAllProducts } from "@/service/products";
+import type { Product } from "@/lib/types";
+
 import { ProductCard } from "@/components/shared/product-card";
-import { products } from "@/lib/placeholder-data";
 import {
   Select,
   SelectContent,
@@ -10,6 +15,23 @@ import {
 import { Label } from "@/components/ui/label";
 
 export default function EarringsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const data = await fetchAllProducts(); // calling backend API
+        setProducts(data);
+      } catch (error) {
+        console.error("❌ Failed to load products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
   return (
     <div className="bg-secondary/20">
       <div className="container mx-auto px-4 py-8 md:py-16">
@@ -41,18 +63,23 @@ export default function EarringsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
-          {products.map((product, index) => (
-            <div
-              key={product.id}
-              className="animate-in fade-in slide-in-from-bottom-5 duration-500"
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <ProductCard product={product} />
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <p className="text-center text-muted-foreground">Loading products...</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+            {products.map((product, index) => (
+              <div
+                key={product.id}
+                className="animate-in fade-in slide-in-from-bottom-5 duration-500"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <ProductCard product={product} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
+

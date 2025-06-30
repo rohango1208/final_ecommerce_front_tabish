@@ -6,6 +6,8 @@ import * as z from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { register } from "@/service/auth";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +26,8 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
+  phone: z.string().min(10, { message: "Phone must be at least 10 digits." }),
+
   password: z.string().min(8, {
     message: "Password must be at least 8 characters.",
   }),
@@ -32,24 +36,50 @@ const formSchema = z.object({
 export default function SignupPage() {
   const { toast } = useToast();
   const router = useRouter();
+const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-    },
-  });
+   defaultValues: {
+  name: "",
+  email: "",
+  password: "",
+  phone: "",
+},
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  });
+async function onSubmit(values: z.infer<typeof formSchema>) {
+  try {
+    setIsSubmitting(true); // Start loading state
+
+    const formData = {
+      Name: values.name,
+      Email: values.email,
+      Password: values.password,
+      Phone: values.phone,
+    };
+
+    const response = await register(formData);
+
     toast({
-      title: "Account Created!",
-      description: "You have successfully signed up. Please log in.",
+      title: "✅ Account Created",
+      description: response || "You have successfully signed up. Please log in.",
     });
-    router.push('/login');
+
+    router.push("/login");
+  } catch (error: any) {
+    toast({
+      title: "❌ Signup Failed",
+      description: error?.response?.data || "Something went wrong.",
+      variant: "destructive",
+    });
+    console.error("Registration error:", error);
+  } finally {
+    setIsSubmitting(false); // Stop loading state
   }
+}
+
+
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-20rem)] bg-secondary/20 py-12">
@@ -77,6 +107,20 @@ export default function SignupPage() {
                             )}
                         />
                         <FormField
+  control={form.control}
+  name="phone"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Phone</FormLabel>
+      <FormControl>
+        <Input type="tel" placeholder="9876543210" {...field} />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+                        <FormField
                             control={form.control}
                             name="email"
                             render={({ field }) => (
@@ -102,7 +146,9 @@ export default function SignupPage() {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" className="w-full">Create Account</Button>
+<Button type="submit" className="w-full" disabled={isSubmitting}>
+  {isSubmitting ? "Creating..." : "Create Account"}
+</Button>
                     </form>
                 </Form>
                  <div className="mt-4 text-center text-sm">
