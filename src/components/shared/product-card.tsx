@@ -19,6 +19,13 @@ export function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const { toast } = useToast();
+  const defaultImage = "/images/default-product.jpg"; // Or a placeholder URL
+
+const images = Array.isArray(product.images) ? product.images : [];
+const firstImage = images[0] || defaultImage;
+const secondImage = images[1];
+const hasMultipleImages = images.length > 1;
+
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -40,16 +47,29 @@ export function ProductCard({ product }: ProductCardProps) {
       >
         <CardContent className="p-0">
           <div className="relative aspect-[1/1.1] w-full">
-            <Image
-              src={product.images[0]}
-              alt={product.name}
-              fill
-              className={cn(
-                "object-cover transition-all duration-500 ease-in-out group-hover:scale-105",
-                isHovered && product.images.length > 1 ? "opacity-0" : "opacity-100"
-              )}
-            />
-            {product.images.length > 1 && (
+          <Image
+  src={firstImage}
+  alt={product.name}
+  fill
+  className={cn(
+    "object-cover transition-all duration-500 ease-in-out group-hover:scale-105",
+    isHovered && hasMultipleImages ? "opacity-0" : "opacity-100"
+  )}
+/>
+
+{hasMultipleImages && secondImage && (
+  <Image
+    src={secondImage}
+    alt={`${product.name} alternate view`}
+    fill
+    className={cn(
+      "object-cover transition-all duration-500 ease-in-out group-hover:scale-105",
+      isHovered ? "opacity-100" : "opacity-0"
+    )}
+  />
+)}
+
+            {/* {product.images.length > 1 && (
               <Image
                 src={product.images[1]}
                 alt={`${product.name} alternate view`}
@@ -59,7 +79,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   isHovered ? "opacity-100" : "opacity-0"
                 )}
               />
-            )}
+            )} */}
             <Button
               size="icon"
               variant="secondary"
@@ -78,7 +98,10 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
           <div className="p-4 text-center">
             <h3 className="font-semibold font-body text-lg leading-tight">{product.name}</h3>
-            <p className="text-muted-foreground mt-1 font-body">${product.price.toFixed(2)}</p>
+           <p className="text-muted-foreground mt-1 font-body">
+  ${typeof product.price === "number" ? product.price.toFixed(2) : "0.00"}
+</p>
+
           </div>
         </CardContent>
       </Card>

@@ -80,16 +80,17 @@ export default function Home() {
             className="w-full"
           >
             <CarouselContent>
-              {products.map((product) => (
-                <CarouselItem
-                  key={product.id}
-                  className="md:basis-1/2 lg:basis-1/3 xl:basis-1/4"
-                >
-                  <div className="p-1">
-                    <ProductCard product={product} />
-                  </div>
-                </CarouselItem>
-              ))}
+              {products.map((product, index) => (
+  <CarouselItem
+    key={product.id ?? `product-${index}`} // Safe fallback
+    className="md:basis-1/2 lg:basis-1/3 xl:basis-1/4"
+  >
+    <div className="p-1">
+      <ProductCard product={product} />
+    </div>
+  </CarouselItem>
+))}
+
             </CarouselContent>
             <CarouselPrevious className="ml-14" />
             <CarouselNext className="mr-14" />

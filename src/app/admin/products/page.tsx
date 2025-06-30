@@ -77,6 +77,10 @@ export default function AdminProductsPage() {
   const [editingProduct, setEditingProduct] = React.useState<Product | null>(
     null
   );
+  
+  
+  const defaultImage = "https://via.placeholder.com/300x300?text=No+Image";
+
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -232,7 +236,7 @@ export default function AdminProductsPage() {
                       alt={product.name}
                       className="aspect-square rounded-md object-cover"
                       height="64"
-                      src={product.images[0]}
+                      src={product.images?.[0] || defaultImage}
                       width="64"
                     />
                   </TableCell>
