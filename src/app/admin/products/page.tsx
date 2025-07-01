@@ -1,15 +1,13 @@
 "use client";
-import api from "@/service/api";
+
 import * as React from "react";
 import { useEffect } from "react";
-
 import Image from "next/image";
 import { MoreHorizontal, PlusCircle, Pencil, Trash2 } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -40,7 +38,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -53,8 +50,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import type { Product } from "@/lib/types";
-import { products as initialProducts } from "@/lib/placeholder-data";
+import type { AdminProduct as Product } from "@/lib/types";
 import {
   Select,
   SelectContent,
@@ -62,41 +58,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createProduct, fetchAllProducts , updateProduct} from "@/service/products";
+import {
+  createProduct,
+  fetchAllProducts,
+  updateProduct,
+  deleteProduct,
+} from "@/service/products";
+
 const productSchema = z.object({
   name: z.string().min(2, "Name is required"),
   price: z.coerce.number().min(0, "Price must be positive"),
+  discount: z.coerce.number().min(0).max(100, "Must be 0–100"),
+  quantity: z.coerce.number().min(0, "Quantity must be at least 0"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   images: z.array(z.string().url()).min(1, "At least one image is required"),
   category: z.string().min(1, "Category is required"),
 });
 
-export default function AdminProductsPage() {
-  const [products, setProducts] = React.useState<Product[]>(initialProducts);
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [editingProduct, setEditingProduct] = React.useState<Product | null>(
-    null
-  );
-  
-  
-  const defaultImage = "https://via.placeholder.com/300x300?text=No+Image";
 
+export default function AdminProductsPage() {
+  const [products, setProducts] = React.useState<Product[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [editingProduct, setEditingProduct] = React.useState<Product | null>(null);
+  const defaultImage = "https://via.placeholder.com/300x300?text=No+Image";
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
 
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      name: "",
-      price: 0,
-      description: "",
-      images: [],
-    },
+  name: "",
+  price: 0,
+  discount: 0,
+  quantity: 0,
+  description: "",
+  images: [],
+  category: "",
+}
+
   });
+
   useEffect(() => {
     const loadProducts = async () => {
       try {
         const data = await fetchAllProducts();
+        console.log("✅ Products from API:", data);
         setProducts(data);
       } catch (err) {
         console.error("❌ Failed to load products:", err);
@@ -107,44 +113,65 @@ export default function AdminProductsPage() {
         });
       }
     };
-
     loadProducts();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (editingProduct) {
-      form.reset({
-        name: editingProduct.name,
-        price: editingProduct.price,
-        description: editingProduct.description,
-        images: editingProduct.images,
-      });
+   form.reset({
+  name: editingProduct.name,
+  price: editingProduct.price,
+  discount: editingProduct.discount || 0,
+  quantity: editingProduct.stockQuantity || 0,
+  description: editingProduct.description,
+  images: editingProduct.imageURL ? [editingProduct.imageURL] : [],
+  category: editingProduct.categoryID?.toString() || "",
+});
+
+
     } else {
       form.reset({
         name: "",
         price: 0,
         description: "",
         images: [],
+        category: "",
       });
     }
   }, [editingProduct, form]);
 
   const handleEdit = (product: Product) => {
-    setEditingProduct(product);
-    setIsDialogOpen(true);
+  // Normalize fields
+  const normalizedProduct: Product = {
+    id: product.id,
+    name: product.Name || product.name,
+    price: product.Price || product.price,
+    imageURL: product.ImageURL || product.imageURL,
+    description: product.Description || product.description,
+    discount: product.Discount ?? product.discount ?? 0,
+    stockQuantity: product.StockQuantity ?? product.stockQuantity ?? 0,
+    categoryID: product.CategoryID || product.categoryID,
+    categoryName: product.CategoryName || product.categoryName,
   };
+
+  setEditingProduct(normalizedProduct);
+  setIsDialogOpen(true);
+};
 
 
   const handleDelete = async (productId: string) => {
   try {
+    console.log("🗑️ Deleting product with ID:", productId); // ✅
     await deleteProduct(productId);
     toast({
       title: "✅ Product Deleted",
       description: "The product has been removed.",
     });
     const updated = await fetchAllProducts();
+    console.log("📦 Products reloaded after delete:", updated); // ✅
     setProducts(updated);
   } catch (err) {
+    console.error("❌ Error deleting product:", err); // ✅
     toast({
       title: "❌ Delete Failed",
       description: "Could not delete product.",
@@ -154,54 +181,61 @@ export default function AdminProductsPage() {
 };
 
 
-
   const handleAddNew = () => {
     setEditingProduct(null);
     setIsDialogOpen(true);
   };
- const onSubmit = async (values: z.infer<typeof productSchema>) => {
-  setIsLoading(true); // Start loading
 
+ const onSubmit = async (values: z.infer<typeof productSchema>) => {
+  setIsLoading(true);
   try {
-    const payload = {
-      Name: values.name,
-      Price: values.price,
-      Description: values.description,
-      ImageURL: values.images[0], // Only first image
-      CategoryID: parseInt(values.category),
-    };
+  const payload = {
+  Name: values.name,
+  Price: values.price,
+  Description: values.description,
+  ImageURL: values.images[0],
+  CategoryID: parseInt(values.category),
+  Quantity: values.quantity,
+  Discount: values.discount,
+};
+
+
+    console.log(editingProduct ? "🔄 Updating product:" : "➕ Adding new product:", payload); // ✅
 
     if (editingProduct) {
-      // ✅ Update existing product
       await updateProduct(editingProduct.id, payload);
       toast({
         title: "✅ Product Updated",
         description: "Product details were updated successfully.",
       });
+      console.log("✅ Product updated successfully.");
     } else {
-      // ✅ Create new product
       await createProduct(payload);
       toast({
         title: "✅ Product Added",
         description: "Product has been successfully created.",
       });
+      console.log("✅ Product created successfully.");
     }
 
     const updated = await fetchAllProducts();
+    console.log("📦 Products reloaded after submit:", updated); // ✅
+
     setProducts(updated);
     setIsDialogOpen(false);
-    form.reset(); // Clear form
+    form.reset();
   } catch (error: any) {
-    console.error("❌ Error submitting product:", error);
+    console.error("❌ Error submitting product:", error); // ✅
     toast({
       title: "❌ Submission Failed",
       description: error?.response?.data || "An error occurred.",
       variant: "destructive",
     });
   } finally {
-    setIsLoading(false); // ✅ Always stop loading
+    setIsLoading(false);
   }
 };
+
 
   return (
     <>
@@ -211,6 +245,7 @@ export default function AdminProductsPage() {
           <PlusCircle className="mr-2 h-4 w-4" /> Add Product
         </Button>
       </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Product Catalog</CardTitle>
@@ -219,37 +254,36 @@ export default function AdminProductsPage() {
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="hidden w-[100px] sm:table-cell">
-                  Image
-                </TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell className="hidden sm:table-cell">
-                    <Image
-                      alt={product.name}
-                      className="aspect-square rounded-md object-cover"
-                      height="64"
-                      src={product.images?.[0] || defaultImage}
-                      width="64"
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>${product.price.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
+  <TableRow>
+    <TableHead className="hidden w-[100px] sm:table-cell">Image</TableHead>
+    <TableHead>Name</TableHead>
+    <TableHead>Price (CAD)</TableHead>
+    <TableHead>Discount (%)</TableHead>
+    <TableHead>Quantity</TableHead>
+    <TableHead>Actions</TableHead>
+  </TableRow>
+</TableHeader>
+        <TableBody>
+  {products.map((product) => (
+    <TableRow key={product.id}>
+      <TableCell className="hidden sm:table-cell">
+        <Image
+          src={product.ImageURL || defaultImage}
+          alt={product.Name || "Product Image"}
+          width={50}
+          height={50}
+          className="object-cover rounded"
+          unoptimized
+        />
+      </TableCell>
+      <TableCell className="font-medium">{product.Name}</TableCell>
+      <TableCell>CA${Number(product.Price).toFixed(2)}</TableCell>
+    <TableCell>{product.discount || 0}%</TableCell>
+<TableCell>{product.stockQuantity || 0}</TableCell>
+      <TableCell>
+        <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button
-                          aria-haspopup="true"
-                          size="icon"
-                          variant="ghost"
-                        >
+                        <Button aria-haspopup="true" size="icon" variant="ghost">
                           <MoreHorizontal className="h-4 w-4" />
                           <span className="sr-only">Toggle menu</span>
                         </Button>
@@ -267,10 +301,10 @@ export default function AdminProductsPage() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
+      </TableCell>
+    </TableRow>
+  ))}
+</TableBody>
           </Table>
         </CardContent>
       </Card>
@@ -284,9 +318,7 @@ export default function AdminProductsPage() {
       >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>
-              {editingProduct ? "Edit Product" : "Add New Product"}
-            </DialogTitle>
+            <DialogTitle>{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
             <DialogDescription>
               {editingProduct
                 ? "Update the details of your product."
@@ -294,19 +326,14 @@ export default function AdminProductsPage() {
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4 py-4"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Product Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                    <FormControl><Input {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -317,22 +344,42 @@ export default function AdminProductsPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" {...field} />
-                    </FormControl>
+                    <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              <FormField
+  control={form.control}
+  name="discount"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Discount (%)</FormLabel>
+      <FormControl><Input type="number" step="1" {...field} /></FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+<FormField
+  control={form.control}
+  name="quantity"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Quantity</FormLabel>
+      <FormControl><Input type="number" {...field} /></FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
               <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea rows={4} {...field} />
-                    </FormControl>
+                    <FormControl><Textarea rows={4} {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -343,24 +390,19 @@ export default function AdminProductsPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">Stud</SelectItem>
-                        <SelectItem value="2">Jhumka</SelectItem>
-                        <SelectItem value="3">Hoop</SelectItem>
+                        <SelectItem value="4">Default Category</SelectItem>
+
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="images"

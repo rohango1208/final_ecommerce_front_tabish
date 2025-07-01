@@ -1,4 +1,18 @@
-export interface Product {
+// types/product.ts
+
+export type AdminProduct = {
+  id: number;
+  name: string;
+  price: number;
+  imageURL: string;
+  description: string;
+  categoryID: number;
+  categoryName?: string;
+  discount?: number;
+  stockQuantity?: number;
+};
+
+export interface StorefrontProduct {
   id: string;
   name: string;
   price: number;
@@ -8,20 +22,4 @@ export interface Product {
   material: 'gold' | 'silver' | 'beads';
   color: 'gold' | 'silver' | 'green' | 'blue' | 'pink';
   isNew: boolean;
-}
-
-export interface Order {
-  id: string;
-  customerName: string;
-  customerEmail: string;
-  orderDate: string;
-  total: number;
-  paymentStatus: 'Paid' | 'Pending' | 'Failed';
-  fulfillmentStatus: 'Fulfilled' | 'Unfulfilled' | 'Processing';
-  items: {
-    productId: string;
-    quantity: number;
-    name: string;
-    price: number;
-  }[];
 }

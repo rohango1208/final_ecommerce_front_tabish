@@ -100,8 +100,9 @@ export default function AdminDashboardPage() {
                         {order.paymentStatus}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
-                  </TableRow>
+<TableCell className="text-right">
+  ${typeof order.total === "number" ? order.total.toFixed(2) : "0.00"}
+</TableCell>                  </TableRow>
                 ))}
               </TableBody>
             </Table>
