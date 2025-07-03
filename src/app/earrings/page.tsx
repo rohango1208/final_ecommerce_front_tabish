@@ -1,3 +1,5 @@
+//earings page.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -18,20 +20,33 @@ export default function EarringsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const data = await fetchAllProducts(); // calling backend API
-        setProducts(data);
-      } catch (error) {
-        console.error("❌ Failed to load products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+ useEffect(() => {
+  const loadProducts = async () => {
+    try {
+      const data = await fetchAllProducts(); // calling backend API
+      console.log("Raw data:", data);
 
-    loadProducts();
-  }, []);
+      const mappedProducts = data.map((item: any) => ({
+        id: item.id,
+        name: item.Name,                  // Fix case
+        price: item.Price,                // Fix case
+        images: [item.ImageURL],          // Convert single image to array
+        description: item.Description,    // Fix case
+        category: item.Category || "",    // Optional: category if needed
+      }));
+
+      console.log("Mapped products:", mappedProducts);
+      setProducts(mappedProducts);
+    } catch (error) {
+      console.error("❌ Failed to load products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadProducts();
+}, []);
+
   return (
     <div className="bg-secondary/20">
       <div className="container mx-auto px-4 py-8 md:py-16">

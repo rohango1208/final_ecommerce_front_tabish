@@ -15,7 +15,10 @@ export const createProduct = async (productData) => {
 export const fetchAllProducts = async (categoryId) => {
   const url = categoryId ? `/products/detailed?categoryId=${categoryId}` : "/products/detailed";
   const response = await api.get(url);
-  return response.data;
+  return response.data.map((product) => ({
+    ...product,
+    images: [product.imageURL],  // Ensure images is always an array
+  }));
 };
 
 // Update product
@@ -39,8 +42,11 @@ export const deleteProduct = async (id) => {
 };
 
 
-// Get products with category
-// export const fetchProductsWithCategory = async () => {
-//   const res = await api.get('/products/detailed');
-//   return res.data;
-// };
+export const fetchProductById = async (id) => {
+  const res = await api.get(`/products/${id}`);
+  const product = res.data;
+  return {
+    ...product,
+    images: [product.imageURL], // Ensure images is always an array
+  };
+};

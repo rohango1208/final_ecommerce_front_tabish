@@ -23,3 +23,15 @@ export interface StorefrontProduct {
   color: 'gold' | 'silver' | 'green' | 'blue' | 'pink';
   isNew: boolean;
 }
+export interface Product {
+  id: number;
+  name: string;
+  price: number;
+  description: string;
+  images: string[];           // Array of images (you can map from single ImageURL too)
+  categoryId?: number;
+  categoryName?: string;
+  discount?: number;
+  stockQuantity?: number;
+  isNew?: boolean;
+}

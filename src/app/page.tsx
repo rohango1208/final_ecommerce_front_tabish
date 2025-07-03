@@ -1,3 +1,5 @@
+//page.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -20,18 +22,30 @@ import {
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
 
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const data = await fetchAllProducts();
-        setProducts(data.slice(0, 8)); // Load only first 8 as "featured"
-      } catch (err) {
-        console.error("❌ Failed to fetch products:", err);
-      }
-    };
+ useEffect(() => {
+  const loadProducts = async () => {
+    try {
+      const data = await fetchAllProducts();
 
-    loadProducts();
-  }, []);
+      const mappedProducts: Product[] = data.map((item: any) => ({
+        id: item.id,
+        name: item.Name || "",  // Fix casing
+        price: item.Price ?? 0,
+        images: [item.ImageURL ?? ""],  // Always wrap in array
+        description: item.Description ?? "",
+        category: item.Category ?? "",
+        isNew: true, // Optional
+      }));
+
+      setProducts(mappedProducts.slice(0, 8));
+    } catch (err) {
+      console.error("❌ Failed to fetch products:", err);
+    }
+  };
+
+  loadProducts();
+}, []);
+
 
   return (
     <div className="flex flex-col">
@@ -81,16 +95,15 @@ export default function Home() {
           >
             <CarouselContent>
               {products.map((product, index) => (
-  <CarouselItem
-    key={product.id ?? `product-${index}`} // Safe fallback
-    className="md:basis-1/2 lg:basis-1/3 xl:basis-1/4"
-  >
-    <div className="p-1">
-      <ProductCard product={product} />
-    </div>
-  </CarouselItem>
-))}
-
+                <CarouselItem
+                  key={product.id ?? `product-${index}`} // Safe fallback
+                  className="md:basis-1/2 lg:basis-1/3 xl:basis-1/4"
+                >
+                  <div className="p-1">
+                    <ProductCard product={product} />
+                  </div>
+                </CarouselItem>
+              ))}
             </CarouselContent>
             <CarouselPrevious className="ml-14" />
             <CarouselNext className="mr-14" />

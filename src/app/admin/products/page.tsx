@@ -195,8 +195,8 @@ export default function AdminProductsPage() {
   Description: values.description,
   ImageURL: values.images[0],
   CategoryID: parseInt(values.category),
-  Quantity: values.quantity,
-  Discount: values.discount,
+ StockQuantity: values.quantity, 
+   Discount: values.discount,
 };
 
 

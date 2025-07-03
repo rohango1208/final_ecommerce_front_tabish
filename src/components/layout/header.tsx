@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Heart, Menu, Search, ShoppingBag, User } from 'lucide-react';
+import { useCart } from '@/hooks/use-cart';
 
 import { Logo } from '@/components/shared/logo';
 import { Button } from '@/components/ui/button';
@@ -28,32 +29,18 @@ import { cn } from '@/lib/utils';
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [user, setUser] = useState<any>(null);
   const pathname = usePathname();
+  const { cartCount } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // 👇 Get user from localStorage
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    window.location.href = "/login"; // or router.push('/login') if using Next Router
-  };
-
-  if (pathname.startsWith("/admin")) {
+  
+  if (pathname.startsWith('/admin')) {
     return null;
   }
 
@@ -109,37 +96,20 @@ export function Header() {
             </Dialog>
 
             <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <User className="h-6 w-6" />
-          <span className="sr-only">User Menu</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-
-        {user ? (
-          <>
-            <DropdownMenuItem asChild>
-              <Link href="/profile">Profile</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleLogout}>
-              Logout
-            </DropdownMenuItem>
-          </>
-        ) : (
-          <>
-            <DropdownMenuItem asChild>
-              <Link href="/login">Login</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/signup">Sign Up</Link>
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User className="h-6 w-6" />
+                  <span className="sr-only">User Menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/login">Login</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/signup">Sign Up</Link></DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Button asChild variant="ghost" size="icon" className="rounded-full">
               <Link href="/wishlist">
@@ -147,9 +117,14 @@ export function Header() {
                 <span className="sr-only">Wishlist</span>
               </Link>
             </Button>
-            <Button asChild variant="ghost" size="icon" className="rounded-full">
+            <Button asChild variant="ghost" size="icon" className="rounded-full relative">
                <Link href="/cart">
                 <ShoppingBag className="h-6 w-6" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                    {cartCount}
+                  </span>
+                )}
                 <span className="sr-only">Cart</span>
               </Link>
             </Button>

@@ -1,3 +1,5 @@
+//product-card.tsx
+
 "use client";
 
 import { useState } from 'react';
@@ -19,10 +21,12 @@ export function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const { toast } = useToast();
-  const defaultImage = "/images/default-product.jpg"; // Or a placeholder URL
+  const defaultImage = "https://placehold.co/600x600.png";
 
-const images = Array.isArray(product.images) ? product.images : [];
-const firstImage = images[0] || defaultImage;
+const images = Array.isArray(product.images) && product.images.length > 0 
+  ? product.images 
+  : ["https://placehold.co/600x600.png"];
+  const firstImage = images[0] || defaultImage;
 const secondImage = images[1];
 const hasMultipleImages = images.length > 1;
 
@@ -39,7 +43,7 @@ const hasMultipleImages = images.length > 1;
   };
 
   return (
-    <Link href="#" className="group block outline-none" tabIndex={0}>
+    <Link href={`/products/${product.id}`} className="group block outline-none" tabIndex={0}>
       <Card 
         className="overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1 focus-within:shadow-xl focus-within:-translate-y-1"
         onMouseEnter={() => setIsHovered(true)}
@@ -69,17 +73,6 @@ const hasMultipleImages = images.length > 1;
   />
 )}
 
-            {/* {product.images.length > 1 && (
-              <Image
-                src={product.images[1]}
-                alt={`${product.name} alternate view`}
-                fill
-                className={cn(
-                  "object-cover transition-all duration-500 ease-in-out group-hover:scale-105",
-                  isHovered ? "opacity-100" : "opacity-0"
-                )}
-              />
-            )} */}
             <Button
               size="icon"
               variant="secondary"
