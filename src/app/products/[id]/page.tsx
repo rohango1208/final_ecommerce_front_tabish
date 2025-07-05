@@ -31,31 +31,55 @@ function ProductPage() {
   useEffect(() => {
     if (typeof id !== "string") return;
 
-    const loadProduct = async () => {
-      setLoading(true);
-      try {
-        const productData = await fetchProductById(id);
-        if (!productData) {
-          notFound();
-          return;
-        }
-        setProduct(productData);
+   // Fix key names when setting product in useEffect:
+const loadProduct = async () => {
+  setLoading(true);
+  try {
+    const productData = await fetchProductById(id);
+    if (!productData) {
+      notFound();
+      return;
+    }
 
-        // Fetch related products (e.g., from the same category, excluding the current one)
-        const allProducts = await fetchAllProducts();
-        const related = allProducts
-          .filter(
-            (p) => p.category === productData.category && p.id !== productData.id
-          )
-          .slice(0, 4);
-        setRelatedProducts(related);
-      } catch (error) {
-        console.error("Failed to fetch product", error);
-        // Handle error state, maybe show a toast
-      } finally {
-        setLoading(false);
-      }
+    // Map API response to expected structure:
+    const mappedProduct = {
+      id: productData.id,
+      name: productData.Name,
+      description: productData.Description,
+      price: productData.Price,
+      images: [productData.ImageURL],  // wrap ImageURL in array
+      category: productData.CategoryName,
+      discount: productData.discount,
+      stockQuantity: productData.stockQuantity,
     };
+
+    setProduct(mappedProduct);
+
+    const allProducts = await fetchAllProducts();
+    console.log("All products:", allProducts);
+const related = allProducts
+  .filter((p) => p.CategoryName === mappedProduct.category && p.id !== mappedProduct.id)
+  .map(p => ({
+    id: p.id,
+    name: p.Name,
+    description: p.Description,
+    price: p.Price,
+    images: [p.ImageURL],
+    category: p.CategoryName,
+    discount: p.discount,
+    stockQuantity: p.stockQuantity,
+  }))
+  .slice(0, 4);
+
+
+    setRelatedProducts(related);
+  } catch (error) {
+    console.error("Failed to fetch product", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
     loadProduct();
   }, [id]);
@@ -123,7 +147,7 @@ function ProductPage() {
               </div>
               <span className="text-muted-foreground text-sm">(14 reviews)</span>
             </div>
-            <p className="text-3xl font-semibold mt-4">${product.price.toFixed(2)}</p>
+            <p className="text-3xl font-semibold mt-4">${product.price}</p>
             <Separator className="my-6" />
             <p className="text-muted-foreground leading-relaxed">
               {product.description}

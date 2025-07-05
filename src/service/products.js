@@ -43,7 +43,9 @@ export const deleteProduct = async (id) => {
 
 
 export const fetchProductById = async (id) => {
+  console.log(id);
   const res = await api.get(`/products/${id}`);
+  console.log(res)
   const product = res.data;
   return {
     ...product,
