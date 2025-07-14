@@ -75,11 +75,12 @@ const productSchema = z.object({
   category: z.string().min(1, "Category is required"),
 });
 
-
 export default function AdminProductsPage() {
   const [products, setProducts] = React.useState<Product[]>([]);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [editingProduct, setEditingProduct] = React.useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = React.useState<Product | null>(
+    null
+  );
   const defaultImage = "https://via.placeholder.com/300x300?text=No+Image";
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -87,15 +88,14 @@ export default function AdminProductsPage() {
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-  name: "",
-  price: 0,
-  discount: 0,
-  quantity: 0,
-  description: "",
-  images: [],
-  category: "",
-}
-
+      name: "",
+      price: 0,
+      discount: 0,
+      quantity: 0,
+      description: "",
+      images: [],
+      category: "",
+    },
   });
 
   useEffect(() => {
@@ -118,17 +118,15 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     if (editingProduct) {
-   form.reset({
-  name: editingProduct.name,
-  price: editingProduct.price,
-  discount: editingProduct.discount || 0,
-  quantity: editingProduct.stockQuantity || 0,
-  description: editingProduct.description,
-  images: editingProduct.imageURL ? [editingProduct.imageURL] : [],
-  category: editingProduct.categoryID?.toString() || "",
-});
-
-
+      form.reset({
+        name: editingProduct.name,
+        price: editingProduct.price,
+        discount: editingProduct.discount || 0,
+        quantity: editingProduct.stockQuantity || 0,
+        description: editingProduct.description,
+        images: editingProduct.imageURL ? [editingProduct.imageURL] : [],
+        category: editingProduct.categoryID?.toString() || "",
+      });
     } else {
       form.reset({
         name: "",
@@ -141,101 +139,100 @@ export default function AdminProductsPage() {
   }, [editingProduct, form]);
 
   const handleEdit = (product: Product) => {
-  // Normalize fields
-  const normalizedProduct: Product = {
-    id: product.id,
-    name: product.Name || product.name,
-    price: product.Price || product.price,
-    imageURL: product.ImageURL || product.imageURL,
-    description: product.Description || product.description,
-    discount: product.Discount ?? product.discount ?? 0,
-    stockQuantity: product.StockQuantity ?? product.stockQuantity ?? 0,
-    categoryID: product.CategoryID || product.categoryID,
-    categoryName: product.CategoryName || product.categoryName,
+    // Normalize fields
+    const normalizedProduct: Product = {
+      id: product.id,
+      name: product.Name || product.name,
+      price: product.Price || product.price,
+      imageURL: product.ImageURL || product.imageURL,
+      description: product.Description || product.description,
+      discount: product.Discount ?? product.discount ?? 0,
+      stockQuantity: product.StockQuantity ?? product.stockQuantity ?? 0,
+      categoryID: product.CategoryID || product.categoryID,
+      categoryName: product.CategoryName || product.categoryName,
+    };
+
+    setEditingProduct(normalizedProduct);
+    setIsDialogOpen(true);
   };
 
-  setEditingProduct(normalizedProduct);
-  setIsDialogOpen(true);
-};
-
-
   const handleDelete = async (productId: string) => {
-  try {
-    console.log("🗑️ Deleting product with ID:", productId); // ✅
-    await deleteProduct(productId);
-    toast({
-      title: "✅ Product Deleted",
-      description: "The product has been removed.",
-    });
-    const updated = await fetchAllProducts();
-    console.log("📦 Products reloaded after delete:", updated); // ✅
-    setProducts(updated);
-  } catch (err) {
-    console.error("❌ Error deleting product:", err); // ✅
-    toast({
-      title: "❌ Delete Failed",
-      description: "Could not delete product.",
-      variant: "destructive",
-    });
-  }
-};
-
+    try {
+      console.log("🗑️ Deleting product with ID:", productId); // ✅
+      await deleteProduct(productId);
+      toast({
+        title: "✅ Product Deleted",
+        description: "The product has been removed.",
+      });
+      const updated = await fetchAllProducts();
+      console.log("📦 Products reloaded after delete:", updated); // ✅
+      setProducts(updated);
+    } catch (err) {
+      console.error("❌ Error deleting product:", err); // ✅
+      toast({
+        title: "❌ Delete Failed",
+        description: "Could not delete product.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleAddNew = () => {
     setEditingProduct(null);
     setIsDialogOpen(true);
   };
 
- const onSubmit = async (values: z.infer<typeof productSchema>) => {
-  setIsLoading(true);
-  try {
-  const payload = {
-  Name: values.name,
-  Price: values.price,
-  Description: values.description,
-  ImageURL: values.images[0],
-  CategoryID: parseInt(values.category),
- StockQuantity: values.quantity, 
-   Discount: values.discount,
-};
+  const onSubmit = async (values: z.infer<typeof productSchema>) => {
+    setIsLoading(true);
+    try {
+      const payload = {
+        Name: values.name,
+        Price: values.price,
+        Description: values.description,
+        ImageURL: values.images[0],
+        CategoryID: parseInt(values.category),
+        StockQuantity: values.quantity,
+        Discount: values.discount,
+      };
 
+      console.log(
+        editingProduct ? "🔄 Updating product:" : "➕ Adding new product:",
+        payload
+      ); // ✅
 
-    console.log(editingProduct ? "🔄 Updating product:" : "➕ Adding new product:", payload); // ✅
+      if (editingProduct) {
+        await updateProduct(editingProduct.id, payload);
+        toast({
+          title: "✅ Product Updated",
+          description: "Product details were updated successfully.",
+        });
+        console.log("✅ Product updated successfully.");
+      } else {
+        await createProduct(payload);
+        toast({
+          title: "✅ Product Added",
+          description: "Product has been successfully created.",
+        });
+        console.log("✅ Product created successfully.");
+      }
 
-    if (editingProduct) {
-      await updateProduct(editingProduct.id, payload);
+      const updated = await fetchAllProducts();
+      console.log("📦 Products reloaded after submit:", updated); // ✅
+
+      setProducts(updated);
+      setIsDialogOpen(false);
+      form.reset();
+    } catch (error: any) {
+      console.error("❌ Error submitting product:", error); // ✅
       toast({
-        title: "✅ Product Updated",
-        description: "Product details were updated successfully.",
+        title: "❌ Submission Failed",
+        description: error?.response?.data || "An error occurred.",
+        variant: "destructive",
       });
-      console.log("✅ Product updated successfully.");
-    } else {
-      await createProduct(payload);
-      toast({
-        title: "✅ Product Added",
-        description: "Product has been successfully created.",
-      });
-      console.log("✅ Product created successfully.");
+    } finally {
+      setIsLoading(false);
     }
-
-    const updated = await fetchAllProducts();
-    console.log("📦 Products reloaded after submit:", updated); // ✅
-
-    setProducts(updated);
-    setIsDialogOpen(false);
-    form.reset();
-  } catch (error: any) {
-    console.error("❌ Error submitting product:", error); // ✅
-    toast({
-      title: "❌ Submission Failed",
-      description: error?.response?.data || "An error occurred.",
-      variant: "destructive",
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   return (
     <>
@@ -254,36 +251,42 @@ export default function AdminProductsPage() {
         <CardContent>
           <Table>
             <TableHeader>
-  <TableRow>
-    <TableHead className="hidden w-[100px] sm:table-cell">Image</TableHead>
-    <TableHead>Name</TableHead>
-    <TableHead>Price (CAD)</TableHead>
-    <TableHead>Discount (%)</TableHead>
-    <TableHead>Quantity</TableHead>
-    <TableHead>Actions</TableHead>
-  </TableRow>
-</TableHeader>
-        <TableBody>
-  {products.map((product) => (
-    <TableRow key={product.id}>
-      <TableCell className="hidden sm:table-cell">
-        <Image
-          src={product.ImageURL || defaultImage}
-          alt={product.Name || "Product Image"}
-          width={50}
-          height={50}
-          className="object-cover rounded"
-          unoptimized
-        />
-      </TableCell>
-      <TableCell className="font-medium">{product.Name}</TableCell>
-      <TableCell>CA${Number(product.Price).toFixed(2)}</TableCell>
-    <TableCell>{product.discount || 0}%</TableCell>
-<TableCell>{product.stockQuantity || 0}</TableCell>
-      <TableCell>
-        <DropdownMenu>
+              <TableRow>
+                <TableHead className="hidden w-[100px] sm:table-cell">
+                  Image
+                </TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Price (CAD)</TableHead>
+                <TableHead>Discount (%)</TableHead>
+                <TableHead>Quantity</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {products.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell className="hidden sm:table-cell">
+                    <Image
+                      src={product.ImageURL || defaultImage}
+                      alt={product.Name || "Product Image"}
+                      width={50}
+                      height={50}
+                      className="object-cover rounded"
+                      unoptimized
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">{product.Name}</TableCell>
+                  <TableCell>CA${Number(product.Price).toFixed(2)}</TableCell>
+                  <TableCell>{product.discount || 0}%</TableCell>
+                  <TableCell>{product.stockQuantity || 0}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
+                        <Button
+                          aria-haspopup="true"
+                          size="icon"
+                          variant="ghost"
+                        >
                           <MoreHorizontal className="h-4 w-4" />
                           <span className="sr-only">Toggle menu</span>
                         </Button>
@@ -301,10 +304,10 @@ export default function AdminProductsPage() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-      </TableCell>
-    </TableRow>
-  ))}
-</TableBody>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
           </Table>
         </CardContent>
       </Card>
@@ -318,7 +321,9 @@ export default function AdminProductsPage() {
       >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
+            <DialogTitle>
+              {editingProduct ? "Edit Product" : "Add New Product"}
+            </DialogTitle>
             <DialogDescription>
               {editingProduct
                 ? "Update the details of your product."
@@ -326,83 +331,111 @@ export default function AdminProductsPage() {
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 py-4"
+            >
+              {/* Product Name */}
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Product Name</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-  control={form.control}
-  name="discount"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Discount (%)</FormLabel>
-      <FormControl><Input type="number" step="1" {...field} /></FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
 
-<FormField
-  control={form.control}
-  name="quantity"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Quantity</FormLabel>
-      <FormControl><Input type="number" {...field} /></FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+              {/* 👉 Price & Discount in one row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
+                <FormField
+                  control={form.control}
+                  name="discount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Discount (%)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="1" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* 👉 Quantity & Category in one row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="quantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantity</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="4">Default Category</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Description */}
               <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Description</FormLabel>
-                    <FormControl><Textarea rows={4} {...field} /></FormControl>
+                    <FormControl>
+                      <Textarea rows={4} {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="4">Default Category</SelectItem>
 
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Image */}
               <FormField
                 control={form.control}
                 name="images"
@@ -420,6 +453,8 @@ export default function AdminProductsPage() {
                   </FormItem>
                 )}
               />
+
+              {/* Submit */}
               <DialogFooter>
                 <Button type="submit" disabled={isLoading}>
                   {isLoading ? "Saving..." : "Save changes"}

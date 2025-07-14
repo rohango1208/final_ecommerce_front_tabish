@@ -94,6 +94,30 @@ export default function Home() {
             className="w-full"
           >
             <CarouselContent>
+  {products.map((product, index) => {
+    const itemCount = products.length;
+
+    let basisClass = 'basis-full'; // default: full width
+
+    if (itemCount === 1) basisClass = 'basis-full'; // 1 item → full width
+    else if (itemCount === 2) basisClass = 'md:basis-1/2'; // 2 items → half width
+    else if (itemCount === 3) basisClass = 'md:basis-1/3'; // 3 items → one-third
+    else if (itemCount >= 4) basisClass = 'md:basis-1/4'; // 4+ items → one-fourth
+
+    return (
+      <CarouselItem
+        key={product.id ?? `product-${index}`}
+        className={basisClass}
+      >
+        <div className="p-1">
+          <ProductCard product={product} />
+        </div>
+      </CarouselItem>
+    );
+  })}
+</CarouselContent>
+
+            {/* <CarouselContent>
               {products.map((product, index) => (
                 <CarouselItem
                   key={product.id ?? `product-${index}`} // Safe fallback
@@ -104,7 +128,7 @@ export default function Home() {
                   </div>
                 </CarouselItem>
               ))}
-            </CarouselContent>
+            </CarouselContent> */}
             <CarouselPrevious className="ml-14" />
             <CarouselNext className="mr-14" />
           </Carousel>

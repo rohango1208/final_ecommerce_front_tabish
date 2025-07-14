@@ -10,12 +10,14 @@ import { Minus, Plus, ShoppingBag, Star } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { fetchProductById } from "@/service/products";
 import { useCart } from "@/hooks/use-cart";
+import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { ProductCard } from "@/components/shared/product-card";
 import { fetchAllProducts } from "@/service/products";
+import { addToCart as addToCartAPI } from "@/service/cart";
 
 function ProductPage() {
   const [product, setProduct] = useState<Product | null>(null);
@@ -23,6 +25,7 @@ function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
+const { toast } = useToast();
 
   const params = useParams();
   const { id } = params;
@@ -88,11 +91,47 @@ const related = allProducts
     return <ProductPageSkeleton />;
   }
 
-  const handleAddToCart = () => {
-    if (product) {
-      addToCart(product, quantity);
+ const handleAddToCart = async () => {
+  try {
+    if (!product) return;
+
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+const userId = user?.UserID || user?.id;
+    if (!userId) {
+      toast({
+        title: "Please login first",
+        description: "You must be logged in to add items to your cart.",
+        variant: "destructive",
+      });
+      return;
     }
-  };
+
+    const payload = {
+      ProductID: product.id,
+      Quantity: quantity,
+    };
+
+    const response = await addToCartAPI(userId, payload);
+    console.log("✅ Cart updated:", response);
+
+    toast({
+      title: "🛒 Added to Cart",
+      description: `${product.name} has been added to your cart.`,
+      duration: 3000,
+    });
+
+    // Optionally update local cart state too
+    // addToCart(product, quantity);
+  } catch (error) {
+    console.error("❌ Failed to add to cart:", error);
+    toast({
+      title: "❌ Error adding to cart",
+      description: "Something went wrong. Please try again.",
+      variant: "destructive",
+    });
+  }
+};
+
   
   const images = Array.isArray(product.images) ? product.images : [];
 

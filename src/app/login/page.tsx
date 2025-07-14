@@ -56,7 +56,7 @@ export default function LoginPage() {
 
       // ✅ Save token & user to localStorage
       localStorage.setItem("token", res.token);
-      localStorage.setItem("user", JSON.stringify(res.user));
+      localStorage.setItem("userId", res.user.id); // 👈 Add this line
 
       toast({
         title: res.message || "Login successful",

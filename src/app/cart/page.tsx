@@ -1,18 +1,94 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Plus, Minus, Trash2 } from "lucide-react";
 
-import { products } from "@/lib/placeholder-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import {
+  getCartByUser,
+  updateCartItem,
+  removeFromCart,
+} from "@/service/cart";
 
 export default function CartPage() {
-  const cartItems = products.slice(2, 5).map(p => ({ ...p, quantity: 1 })); // Placeholder
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const shipping = 5.00;
+  // ✅ Get user info (add console)
+  const user =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("user") || "{}")
+      : {};
+  const userId = user?.UserID || user?.id;
+  console.log("🧾 Logged in user:", user);
+  console.log("🧾 User ID:", userId);
+
+  useEffect(() => {
+    const loadCart = async () => {
+      if (!userId) {
+        console.warn("❌ No userId found");
+        return;
+      }
+
+      try {
+        console.log("📦 Fetching cart for userId:", userId);
+        const items = await getCartByUser(userId);
+        console.log("✅ Cart items fetched from API:", items);
+        setCartItems(items);
+      } catch (err) {
+        console.error("❌ Error fetching cart:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCart();
+  }, [userId]);
+
+  // 🔁 Quantity change
+  const handleUpdateQuantity = async (productId: number, newQty: number) => {
+    if (newQty < 1) return;
+    try {
+      console.log("🔁 Updating quantity:", { productId, newQty });
+      await updateCartItem(userId, productId, newQty);
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.ProductID === productId ? { ...item, Quantity: newQty } : item
+        )
+      );
+    } catch (err) {
+      console.error("❌ Failed to update quantity", err);
+    }
+  };
+
+  // 🗑 Remove from cart
+  const handleRemoveItem = async (productId: number) => {
+    try {
+      console.log("🗑 Removing product:", productId);
+      await removeFromCart(userId, productId);
+      setCartItems((prev) =>
+        prev.filter((item) => item.ProductID !== productId)
+      );
+    } catch (err) {
+      console.error("❌ Failed to remove item", err);
+    }
+  };
+
+  // 🧮 Totals
+  const subtotal = cartItems.reduce(
+    (acc, item) => acc + item.Price * item.Quantity,
+    0
+  );
+  const shipping = 5.0;
   const total = subtotal + shipping;
+
+  console.log("🛒 Final cartItems in UI:", cartItems);
+
+  if (loading) return <p className="text-center py-20">Loading cart...</p>;
 
   return (
     <div className="bg-background">
@@ -23,28 +99,65 @@ export default function CartPage() {
             Review your items and proceed to checkout.
           </p>
         </div>
-        
+
         {cartItems.length > 0 ? (
           <div className="grid lg:grid-cols-3 gap-8 md:gap-12">
             <div className="lg:col-span-2 space-y-6">
-              {cartItems.map(item => (
-                <div key={item.id} className="flex items-center gap-4 bg-card p-4 rounded-lg shadow-sm">
-                  <Image src={item.images[0]} alt={item.name} width={100} height={100} className="rounded-md" />
+              {cartItems.map((item) => (
+                <div
+                  key={item.ProductID}
+                  className="flex items-center gap-4 bg-card p-4 rounded-lg shadow-sm"
+                >
+                  <Image
+                    src={item.ImageURL}
+                    alt={item.ProductName}
+                    width={100}
+                    height={100}
+                    className="rounded-md"
+                  />
                   <div className="flex-grow">
-                    <h3 className="font-semibold">{item.name}</h3>
-                    <p className="text-sm text-muted-foreground">${item.price.toFixed(2)}</p>
+                    <h3 className="font-semibold">{item.ProductName}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      ${item.Price.toFixed(2)}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className="h-8 w-8">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() =>
+                        handleUpdateQuantity(item.ProductID, item.Quantity - 1)
+                      }
+                    >
                       <Minus className="h-4 w-4" />
                     </Button>
-                    <Input type="number" value={item.quantity} className="h-8 w-14 text-center" readOnly />
-                    <Button variant="outline" size="icon" className="h-8 w-8">
+                    <Input
+                      type="number"
+                      value={item.Quantity}
+                      className="h-8 w-14 text-center"
+                      readOnly
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() =>
+                        handleUpdateQuantity(item.ProductID, item.Quantity + 1)
+                      }
+                    >
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
-                  <p className="font-semibold w-20 text-right">${(item.price * item.quantity).toFixed(2)}</p>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                  <p className="font-semibold w-20 text-right">
+                    ${(item.Price * item.Quantity).toFixed(2)}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-destructive"
+                    onClick={() => handleRemoveItem(item.ProductID)}
+                  >
                     <Trash2 className="h-5 w-5" />
                   </Button>
                 </div>
@@ -78,7 +191,7 @@ export default function CartPage() {
               Looks like you haven't added anything to your cart yet.
             </p>
             <Button asChild>
-                <Link href="/earrings">Start Shopping</Link>
+              <Link href="/earrings">Start Shopping</Link>
             </Button>
           </div>
         )}

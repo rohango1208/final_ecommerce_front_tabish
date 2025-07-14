@@ -1,3 +1,5 @@
+"use client";
+
 import Link from 'next/link';
 import {
   LayoutDashboard,
@@ -5,8 +7,9 @@ import {
   Settings,
   ShoppingCart,
   Users,
+  User,
 } from 'lucide-react';
-
+import { useState, useEffect } from "react";
 import {
   SidebarProvider,
   Sidebar,
@@ -15,7 +18,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarInset,
   SidebarTrigger,
   SidebarFooter,
 } from '@/components/ui/sidebar';
@@ -28,15 +30,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<any>(null);
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen">
@@ -52,11 +58,7 @@ export default function AdminLayout({
           <SidebarContent className="p-2">
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip={{ children: 'Dashboard' }}
-                  isActive
-                >
+                <SidebarMenuButton asChild tooltip={{ children: 'Dashboard' }} isActive>
                   <Link href="/admin">
                     <LayoutDashboard />
                     <span>Dashboard</span>
@@ -104,21 +106,40 @@ export default function AdminLayout({
         </Sidebar>
         <div className="flex-1">
           <header className="flex h-16 items-center justify-end border-b px-4">
-             <DropdownMenu>
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="@admin" />
-                    <AvatarFallback>AD</AvatarFallback>
-                  </Avatar>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User className="h-6 w-6" />
+                  <span className="sr-only">User Menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/">Logout</Link>
-                </DropdownMenuItem>
+                {user ? (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        localStorage.removeItem("user");
+                        window.location.href = "/";
+                      }}
+                    >
+                      Logout
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/login">Login</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/signup">Sign Up</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </header>
