@@ -8,39 +8,26 @@ import { Plus, Minus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import {
-  getCartByUser,
-  updateCartItem,
-  removeFromCart,
-} from "@/service/cart";
+import { getCartByUser, updateCartItem, removeFromCart } from "@/service/cart";
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Get user info (add console)
   const user =
     typeof window !== "undefined"
       ? JSON.parse(localStorage.getItem("user") || "{}")
       : {};
   const userId = user?.UserID || user?.id;
-  console.log("🧾 Logged in user:", user);
-  console.log("🧾 User ID:", userId);
 
   useEffect(() => {
     const loadCart = async () => {
-      if (!userId) {
-        console.warn("❌ No userId found");
-        return;
-      }
-
+      if (!userId) return;
       try {
-        console.log("📦 Fetching cart for userId:", userId);
         const items = await getCartByUser(userId);
-        console.log("✅ Cart items fetched from API:", items);
         setCartItems(items);
       } catch (err) {
-        console.error("❌ Error fetching cart:", err);
+        console.error("Failed to load cart", err);
       } finally {
         setLoading(false);
       }
@@ -49,11 +36,9 @@ export default function CartPage() {
     loadCart();
   }, [userId]);
 
-  // 🔁 Quantity change
   const handleUpdateQuantity = async (productId: number, newQty: number) => {
     if (newQty < 1) return;
     try {
-      console.log("🔁 Updating quantity:", { productId, newQty });
       await updateCartItem(userId, productId, newQty);
       setCartItems((prev) =>
         prev.map((item) =>
@@ -61,32 +46,48 @@ export default function CartPage() {
         )
       );
     } catch (err) {
-      console.error("❌ Failed to update quantity", err);
+      console.error("Error updating quantity", err);
     }
   };
 
-  // 🗑 Remove from cart
   const handleRemoveItem = async (productId: number) => {
     try {
-      console.log("🗑 Removing product:", productId);
       await removeFromCart(userId, productId);
-      setCartItems((prev) =>
-        prev.filter((item) => item.ProductID !== productId)
-      );
+      setCartItems((prev) => prev.filter((item) => item.ProductID !== productId));
     } catch (err) {
-      console.error("❌ Failed to remove item", err);
+      console.error("Error removing item", err);
     }
   };
 
-  // 🧮 Totals
+const handleCheckout = async () => {
+  try {
+    const res = await fetch(`http://localhost:5000/api/stripe/create-checkout-session`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, cartItems }),
+    });
+    const data = await res.json();
+
+    if (data.url) {
+      // Redirect user to Stripe Checkout
+      window.location.href = data.url;
+    } else {
+      alert(data.error || "Failed to initiate checkout");
+    }
+  } catch (err) {
+    console.error("Checkout error:", err);
+    alert("Something went wrong. Please try again.");
+  }
+};
+
+
+
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.Price * item.Quantity,
     0
   );
-  const shipping = 5.0;
+  const shipping = cartItems.length > 0 ? 5.0 : 0;
   const total = subtotal + shipping;
-
-  console.log("🛒 Final cartItems in UI:", cartItems);
 
   if (loading) return <p className="text-center py-20">Loading cart...</p>;
 
@@ -102,6 +103,7 @@ export default function CartPage() {
 
         {cartItems.length > 0 ? (
           <div className="grid lg:grid-cols-3 gap-8 md:gap-12">
+            {/* Cart Items */}
             <div className="lg:col-span-2 space-y-6">
               {cartItems.map((item) => (
                 <div
@@ -164,6 +166,7 @@ export default function CartPage() {
               ))}
             </div>
 
+            {/* Order Summary */}
             <div className="bg-card p-6 rounded-lg shadow-sm h-fit">
               <h2 className="text-xl font-bold mb-4">Order Summary</h2>
               <div className="space-y-2">
@@ -181,7 +184,9 @@ export default function CartPage() {
                 <p>Total</p>
                 <p>${total.toFixed(2)}</p>
               </div>
-              <Button className="w-full mt-6">Proceed to Checkout</Button>
+              <Button className="w-full mt-6" onClick={handleCheckout}>
+                Proceed to Checkout
+              </Button>
             </div>
           </div>
         ) : (
